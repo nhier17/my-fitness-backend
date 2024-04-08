@@ -5,8 +5,31 @@ require('express-async-errors');
 const express = require('express');
 const app = express();
 
+//rest of packages
+const cors = require('cors');
+const rateLimiter = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
+
 //db
 const connectDB = require('./db/connect');
+
+//routers
+const authRouter = require('./routes/AuthRoutes');
+
+//middleware
+const notFoundMiddleware = require('./middleware/not-Found');
+const errorHandlerMiddleware = require('./middleware/error-handler');
+
+
+app.use(cors());
+
+app.use(express.json());
+app.use(cookieParser(process.env.JWT_SECRET));
+
+app.use('/api/auth', authRouter);
+
+app.use(notFoundMiddleware);
+app.use(errorHandlerMiddleware);
 //mock route
 
 app.get('/', (req, res) => {
