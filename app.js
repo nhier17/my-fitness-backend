@@ -12,7 +12,7 @@ const connectDB = require('./db/connect');
 app.get('/', (req, res) => {
     res.send('Eat, Train, Sleep!');
 });
-
+//create user schema and controllers
 
 
 
