@@ -44,7 +44,7 @@ const login = async (req, res) => {
             throw new CustomError.UnauthenticatedErro('Invalid credentials');
         }
         //check password
-        const isPasswordCorrect = await bcrypt.compare(password);
+        const isPasswordCorrect = await user.compare(password);
         if (!isPasswordCorrect) {
             throw new  CustomError.UnauthenticatedError('Invalid credentials');
         }
