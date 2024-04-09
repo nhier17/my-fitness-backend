@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
+const speakeasy = require('speakeasy');
 
 //define user schema
 const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
@@ -37,6 +38,11 @@ const userSchema = new mongoose.Schema({
         enum: ['admin', 'user'],
         default: 'user',
     }, 
+    twoFactorSecret: String,
+    twoFactorEnabled: {
+        type: Boolean,
+        default: false,
+    }
    
 });
 //harsh the password
@@ -49,6 +55,24 @@ userSchema.pre('save', async function() {
 userSchema.methods.comparePassowrd = async function(userPassword) {
 const isMatch = await bcrypt.compare(userPassword, this.password);
     return isMatch;
+};
+//compare 2FA setup
+
+userSchema.methods.verifyTwoFactorSetup = async function(verificationCode) {
+if(!this.twoFactorEnabled || !this.twoFactorSecret) {
+    return false;
+}
+try {
+    const isValid = speakeasy.totp.verify({
+        secret: this.twoFactorSecret,
+        encoding: 'base32',
+        token: verificationCode
+    });
+    return isValid;
+} catch (error) {
+    console.error('Error verifying 2FA setup:', error);
+    return false;
+}
 };
 
 const User = mongoose.model('User',userSchema);

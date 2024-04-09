@@ -34,20 +34,29 @@ const registerUser = async (req, res) => {
 
 //login user
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password,verificationCode } = req.body;
     if(!email || !password) {
         throw new CustomError.BadRequestError('Please provide email and password');
     }
     try {
         const user = await User.findOne({ email });
         if (!user) {
-            throw new CustomError.UnauthenticatedErro('Invalid credentials');
+            throw new CustomError.UnauthenticatedError('Invalid credentials');
         }
-        //check password
-        const isPasswordCorrect = await user.compare(password);
-        if (!isPasswordCorrect) {
-            throw new  CustomError.UnauthenticatedError('Invalid credentials');
+        //check if 2FA is enabled for the user
+        if(user.twoFactorEnabled) {
+            const is2FAVerified = await user.verifyTwoFactorSetup(verificationCode);
+            if(!is2FAVerified) {
+                throw new CustomError.UnauthenticatedError('Invalid credentials');
+            }
+        } else {
+  //check password if 2FA is not enabled
+  const isPasswordCorrect = await user.comparePassowrd(password);
+  if (!isPasswordCorrect) {
+      throw new  CustomError.UnauthenticatedError('Invalid credentials');
+  }
         }
+      
         const tokenUser = createTokenUser(user);
         attachCookiesToResponse({ res, user: tokenUser });
         res.status(StatusCodes.OK).json({
@@ -67,9 +76,46 @@ const logout = async (req, res) => {
     });
     res.status(StatusCodes.OK).json({ msg: 'user logged out!' });
   };
+  //enable 2FA
+  const enable2FA = async (req, res) => {
+    const userdId = req.user._id;
+    const { verificationCode } = req.body;
+    try {
+        const user = await User.findById(userdId);
+        if (!user) {
+            throw new NotFound('USer not found');
+        }
+        user.twoFactorEnabled = true;
+        await user.save();
+        res.status(StatusCodes.OK).json({ msg: '2FA enabled successfuly!' });
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({
+            error: error.message
+        });
+    }
+  };
+  //disable 2FA
+  const disable2FA = async (req, res) => {
+    const userdId = req.user._id;
+    try {
+        const user = await User.findById(userdId);
+        if (!user) {
+            throw new NotFound('USer not found');
+        }
+        user.twoFactorEnabled = false;
+        await user.save();
+        res.status(StatusCodes.OK).json({ msg: '2FA disabled successfuly!' });
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({
+            error: error.message
+        });
+    }
+  };
 
 module.exports = {
     registerUser,
     login,
-    logout
+    logout,
+    enable2FA,
+    disable2FA
 };
