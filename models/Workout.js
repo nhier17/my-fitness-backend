@@ -16,7 +16,7 @@ const workoutSchema = new mongoose.Schema({
         },
             duration: Number,
             weight: Number,
-            reps: Number
+            reps: Number,
            sets: Number,
            distance: Number,
          

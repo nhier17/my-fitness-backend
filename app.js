@@ -15,6 +15,7 @@ const connectDB = require('./db/connect');
 
 //routers
 const authRouter = require('./routes/AuthRoutes');
+const workoutRouter = require('./routes/WorkoutRoutes');
 
 //middleware
 const notFoundMiddleware = require('./middleware/not-Found');
@@ -27,6 +28,7 @@ app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 
 app.use('/api/auth', authRouter);
+app.use('/api/workouts', workoutRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

@@ -50,7 +50,7 @@ const getWorkoutById = async (req, res) => {
 
 //update a workout by id
 
-const updateWorkoutById = async (req, res) => {
+const updateWorkout = async (req, res) => {
     const { id } = req.params;
     const { user, exercises, totalDuration,totalWeight, totalReps } = req.body;
     try {
@@ -73,7 +73,7 @@ const updateWorkoutById = async (req, res) => {
 
 //delete a workout by id
 
-const deleteWorkoutById = async (req, res) => {
+const deleteWorkout = async (req, res) => {
     const { id } = req.params;
     try {
         const workout = await Workout.findByIdAndDelete(id);
@@ -91,6 +91,6 @@ module.exports = {
     createWorkout,
     getAllWorkouts,
     getWorkoutById,
-    updateWorkoutById,
-    deleteWorkoutById
+    updateWorkout,
+    deleteWorkout
 };
