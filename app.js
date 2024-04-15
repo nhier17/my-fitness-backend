@@ -27,10 +27,11 @@ app.use(cors());
 
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
+app.use('/uploads',express.static('uploads'))
 
 app.use('/api/auth', authRouter);
-app.use('/api/workouts', workoutRouter);
-
+app.use('/api/workout', workoutRouter);
+app.use('/api/exercise', exerciseRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

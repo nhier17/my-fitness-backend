@@ -4,13 +4,18 @@ const{ BadRequest } = require('../errors');
 
 //create a new Exercise
 const createExercise = async (req, res) => {
-    const { name, difficulty, category, image, videoUrl } = req.body;
+    const { name, bodyPart, category, videoUrl } = req.body;
+    const image = req.file;
+    if (!image) {
+        throw new CustomError.NotFoundError('No images uploaded');
+    }
+    const imagePath = '/uploads/' + image.filename;
     try {
        const newExercise = await Exercise.create({
         name,
-        difficulty,
+        bodyPart,
         category,
-        image,
+        image: imagePath,
         videoUrl
        });
        res.status(StatusCodes.CREATED).json(newExercise); 
@@ -20,7 +25,6 @@ const createExercise = async (req, res) => {
 };
 
 //get all exercises
-
 const getAllExercises = async (req, res) => {
     try {
         const exercises = await Exercise.find();
@@ -46,14 +50,13 @@ const getExerciseById = async (req, res) => {
 };
 
 //update exercise by id
-
 const updateExercise = async (req, res) => {
     const { id } = req.params;
-    const { name, difficulty, category, image, videoUrl } = req.body;
+    const { name, bodyPart, category, image, videoUrl } = req.body;
     try {
         const exercise = await Exercise.findByIdAndUpdate(id,{
             name,
-            difficulty,
+            bodyPart,
             category,
             image,
             videoUrl
@@ -76,6 +79,7 @@ const deleteExercise = async (req, res) => {
         if (!exercise) {
             throw new BadRequest('Exercise not found');
         }
+        await exercise.remove();
         res.status(StatusCodes.OK).json({message: 'Exercise deleted successfully!'});
     } catch (error) {
         console.error('Error deleting exercise by id',error);

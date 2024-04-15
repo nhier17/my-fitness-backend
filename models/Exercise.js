@@ -9,8 +9,8 @@ const exerciseSchema = new mongoose.Schema({
     description: {
         type: String,
     },
-    difficulty: {
-        type: Number,
+    bodyPart: {
+        type: String,
         required: true
     },
     category: {

@@ -80,7 +80,7 @@ const deleteWorkout = async (req, res) => {
         if (!workout) {
             res.status(StatusCodes.NOT_FOUND).json({ message: 'Workout not found' });
         };
-
+        await workout.remove();
         res.status(StatusCodes.OK).json({ message: 'Workout deleted successfully'});
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
