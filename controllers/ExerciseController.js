@@ -38,7 +38,7 @@ const getAllExercises = async (req, res) => {
          }
 
 
-        const exercises = await Exercise.find(queryObject).exec();
+        const exercises = await Exercise.find(queryObject).exec({ timeout: false });
         res.status(StatusCodes.OK).json({ exercises });
     } catch (error) {
         console.error('Error getting all exercises',error);
