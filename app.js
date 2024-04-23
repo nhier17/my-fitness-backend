@@ -19,7 +19,7 @@ const workoutRouter = require('./routes/WorkoutRoutes');
 const exerciseRouter = require('./routes/ExerciseRoutes');
 
 //middleware
-const notFoundMiddleware = require('./middleware/not-Found');
+const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
 
 
