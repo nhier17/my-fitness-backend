@@ -27,8 +27,19 @@ const createExercise = async (req, res) => {
 //get all exercises
 const getAllExercises = async (req, res) => {
     try {
-        const exercises = await Exercise.find();
-        res.status(StatusCodes.OK).json(exercises);
+        //queries
+        const { category, search } = req.query;
+        const queryObject = {};
+        if (category) {
+            queryObject.category = category;
+        }
+         if (search) {
+            queryObject.name = { $regex: new RegExp(search, 'i') };
+         }
+
+
+        const exercises = await Exercise.find(queryObject).exec();
+        res.status(StatusCodes.OK).json({ exercises });
     } catch (error) {
         console.error('Error getting all exercises',error);
     }
