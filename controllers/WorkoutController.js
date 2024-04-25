@@ -4,14 +4,10 @@ const{ BadRequest } = require('../errors')
 
 //create a new Workout
 const createWorkout = async (req, res) => {
-    const { user, exercises, totalDuration,totalWeight, totalReps } = req.body;
+    const { exercises } = req.body;
     try {
         const newWorkout = await Workout({
-            user,
             exercises,
-            totalDuration,
-            totalWeight,
-            totalReps
         });
         await newWorkout.save();
         res.status(StatusCodes.CREATED).json(newWorkout);
@@ -22,7 +18,6 @@ const createWorkout = async (req, res) => {
 };
 
 //get all workouts
-
 const getAllWorkouts = async (req, res) => {
     try {
         const workouts = await Workout.find();
@@ -33,7 +28,6 @@ const getAllWorkouts = async (req, res) => {
 };
 
 //get a workout by id
-
 const getWorkoutById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -49,17 +43,13 @@ const getWorkoutById = async (req, res) => {
 };
 
 //update a workout by id
-
 const updateWorkout = async (req, res) => {
     const { id } = req.params;
-    const { user, exercises, totalDuration,totalWeight, totalReps } = req.body;
+    const { user, exercises } = req.body;
     try {
         const workout = await Workout.findByIdAndUpdate(id, {
             user,
-            exercises,
-            totalDuration,
-            totalWeight,
-            totalReps
+            exercises
         }, { new: true });
         if (!workout) {
             res.status(StatusCodes.NOT_FOUND).json({ message: 'Workout not found' });
@@ -72,7 +62,6 @@ const updateWorkout = async (req, res) => {
 };
 
 //delete a workout by id
-
 const deleteWorkout = async (req, res) => {
     const { id } = req.params;
     try {

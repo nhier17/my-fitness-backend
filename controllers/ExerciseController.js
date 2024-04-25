@@ -46,7 +46,6 @@ const getAllExercises = async (req, res) => {
 };
 
 //get exercise by id
-
 const getExerciseById = async (req, res) => {
     const { id } = req.params;
     try {
