@@ -1,14 +1,18 @@
 const Workout = require('../models/Workout')
 const { StatusCodes } = require('http-status-codes')
-const{ BadRequest } = require('../errors')
+const{ BadRequestError } = require('../errors')
 
 //create a new Workout
 const createWorkout = async (req, res) => {
-    const { exercises } = req.body;
     try {
+        const { exercises } = req.body;
+        if (!exercises || !Array.isArray(exercises)){
+            throw new BadRequestError('Exercises must be an array');
+        }
         const newWorkout = await Workout({
             exercises,
         });
+        
         await newWorkout.save();
         res.status(StatusCodes.CREATED).json(newWorkout);
     } catch (error) {
