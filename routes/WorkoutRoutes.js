@@ -6,10 +6,12 @@ const {
     getAllWorkouts,
     getWorkoutById,
     updateWorkout,
-    deleteWorkout
+    deleteWorkout,
+    startWorkout
 } = require('../controllers/WorkoutController');
 
 router.route('/').post(createWorkout).get(getAllWorkouts);
+router.post('/start-workout', startWorkout)
 router.route('/workouts/:id')
 .get(getWorkoutById)
 .patch(updateWorkout)

@@ -79,11 +79,31 @@ const deleteWorkout = async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
     }
 };
+//start workout
+
+const startWorkout = async (req, res) => {
+    try {
+      const { selectedExercises } = req.body;
+      //check if it is an array
+      if(!Array.isArray(selectedExercises)) {
+        throw new BadRequestError('selectedExercises must be an array');
+      }
+      // create new workout doc
+      const newWorkout = await Workout.create({
+        exercises: selectedExercises,
+      });
+      res.status(StatusCodes.CREATED).json(newWorkout);
+    } catch (error) {
+        console.error('Error starting workout',error);
+        res.status(StatusCodes.BAD_REQUEST).json({error:error.message});
+    }
+};
 
 module.exports = {
     createWorkout,
     getAllWorkouts,
     getWorkoutById,
     updateWorkout,
-    deleteWorkout
+    deleteWorkout,
+    startWorkout,
 };
