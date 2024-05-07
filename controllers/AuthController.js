@@ -161,6 +161,24 @@ const logout = async (req, res) => {
         });
     }
   };
+
+  //update user profile pic
+  const updateUserProfile = async (req, res) => {
+    const { name, email } = req.body;
+    const profilePicture = req.file ? req.file.path : undefined;
+
+    try {
+        const user = await User.findOneAndUpdate({ email}, { name, profilePicture }, { new: true});
+        if (!user) {
+            throw new CustomError.NotFoundError('User not found');
+        }
+        res.status(StatusCodes.OK).json({ user });
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({
+            error: error.message
+        });
+    }
+  }
    
 
 module.exports = {
@@ -171,4 +189,5 @@ module.exports = {
     disable2FA,
     forgotPassword,
     resetPassword,
+    updateUserProfile,
 };
