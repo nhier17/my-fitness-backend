@@ -80,23 +80,22 @@ const deleteWorkout = async (req, res) => {
     }
 };
 //start workout
-
 const startWorkout = async (req, res) => {
-    try {
-      const { selectedExercises } = req.body;
-      //check if it is an array
-      if(!Array.isArray(selectedExercises)) {
-        throw new BadRequestError('selectedExercises must be an array');
-      }
-      // create new workout doc
-      const newWorkout = await Workout.create({
-        exercises: selectedExercises,
-      });
-      res.status(StatusCodes.CREATED).json(newWorkout);
-    } catch (error) {
-        console.error('Error starting workout',error);
-        res.status(StatusCodes.BAD_REQUEST).json({error:error.message});
+const { id } = req.params;
+try {
+    const workout = await Workout.findById(id);
+    //check if workout exists
+    if(!workout) {
+        res.status(StatusCodes.NOT_FOUND).json({ message: 'Workout not found' });
+        return;
     }
+    //update startedAt field 
+    workout.startedAt = new Date();
+    await workout.save();
+    res.status(StatusCodes.OK).json(workout);
+} catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
+}
 };
 
 module.exports = {
