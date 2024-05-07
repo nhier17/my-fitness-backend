@@ -42,7 +42,8 @@ const userSchema = new mongoose.Schema({
     twoFactorEnabled: {
         type: Boolean,
         default: false,
-    }
+    },
+    profilePicture: String
    
 });
 //harsh the password
