@@ -1,6 +1,6 @@
 const Exercise = require('../models/Exercise');
 const { StatusCodes } = require('http-status-codes');
-const{ BadRequest } = require('../errors');
+const CustomError = require('../errors');
 
 //create a new Exercise
 const createExercise = async (req, res) => {
@@ -51,7 +51,7 @@ const getExerciseById = async (req, res) => {
     try {
         const exercise = await Exercise.findById(id);
         if (!exercise) {
-            throw new BadRequest('Exercise not found');
+            throw new CustomError.BadRequest('Exercise not found');
         }
         res.status(StatusCodes.OK).json(exercise);
     } catch (error) {
@@ -72,7 +72,7 @@ const updateExercise = async (req, res) => {
             videoUrl
         }, {new: true});
         if (!exercise) {
-            throw new BadRequest('Exercise not found');
+            throw new CustomError.BadRequest('Exercise not found');
         }
         res.status(StatusCodes.OK).json(exercise);
     } catch (error) {
@@ -87,7 +87,7 @@ const deleteExercise = async (req, res) => {
     try {
         const exercise = await Exercise.findByIdAndDelete(id);
         if (!exercise) {
-            throw new BadRequest('Exercise not found');
+            throw new CustomError.BadRequest('Exercise not found');
         }
         await exercise.remove();
         res.status(StatusCodes.OK).json({message: 'Exercise deleted successfully!'});

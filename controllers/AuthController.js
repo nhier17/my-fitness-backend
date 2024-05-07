@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const { StatusCodes } = require('http-status-codes')
-const{ BadRequest } = require('../errors')
+const CustomError = require('../errors')
 const { attachCookiesToResponse,createTokenUser } = require('../utils')
 
 //register new user 
@@ -10,7 +10,7 @@ const registerUser = async (req, res) => {
     //check if email already exists
     const emailAlreadyExists = await User.findOne({ email });
     if (emailAlreadyExists) {
-        throw new BadRequest('Email already exists')
+        throw new CustomError.BadRequest('Email already exists')
     }  
     //first registered user is admin
     const isFirstAccount = (await User.countDocuments({})) === 0;

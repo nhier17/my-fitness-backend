@@ -29,7 +29,7 @@ router.post('/login', login);
 router.get('/logout', logout);
 router.post('/reset-password', resetPassword);
 router.post('/forgot-password', forgotPassword);
-router.post('/ update-profile', upload.single('profilePicture'),updateUserProfile)
+router.post('/update-profile', upload.single('profilePicture'),updateUserProfile)
 //2fa
 router.post('/2fa/enable', enable2FA);
 router.post('/2fa/disable', disable2FA);
