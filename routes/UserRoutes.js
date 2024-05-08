@@ -6,7 +6,7 @@ const {
     getSingleUser,
     updateUser,
     updatePassword,
-} = require('../controllers/USerController');
+} = require('../controllers/UserController');
 
 
 router.route('/').get(getAllUsers);
