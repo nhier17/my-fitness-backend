@@ -10,7 +10,7 @@ const registerUser = async (req, res) => {
     //check if email already exists
     const emailAlreadyExists = await User.findOne({ email });
     if (emailAlreadyExists) {
-        throw new CustomError.BadRequest('Email already exists')
+        throw new CustomError.BadRequestError('Email already exists')
     }  
     //first registered user is admin
     const isFirstAccount = (await User.countDocuments({})) === 0;
@@ -164,14 +164,17 @@ const logout = async (req, res) => {
 
   //update user profile pic
   const updateUserProfile = async (req, res) => {
-    const { name, email } = req.body;
+    const {userId } = req.body;
     const profilePicture = req.file ? req.file.path : undefined;
 
     try {
-        const user = await User.findOneAndUpdate({ email}, { name, profilePicture }, { new: true});
+        let user = await User.findById(userId);
         if (!user) {
             throw new CustomError.NotFoundError('User not found');
         }
+        
+        user.profilePicture = profilePicture || user.profilePicture;
+        await user.save();
         res.status(StatusCodes.OK).json({ user });
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json({
