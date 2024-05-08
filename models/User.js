@@ -4,8 +4,6 @@ const validator = require('validator');
 const speakeasy = require('speakeasy');
 
 //define user schema
-const passwordStrengthRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
-
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -26,11 +24,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide password'],
         minlength: 6,
-        validate: {
-            validator: value => passwordStrengthRegex.test(value),
-            message: "Password must contain at least one lowercase letter, one uppercase letter or one special character",
-        }
-
     }, 
     role: {
         type: String,
