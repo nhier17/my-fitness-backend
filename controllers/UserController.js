@@ -20,9 +20,8 @@ const getAllUsers = async (req, res) => {
 
 //get user by id
 const getSingleUser = async (req, res) => {
-    const { id } = req.params;
     try {
-        const user = await User.findOne(id);
+        const user = await User.findOne({ _id: req.params.id });
         if(!user) {
             throw new CustomError.NotFoundError('User not found');
         }
@@ -43,7 +42,7 @@ const updateUser = async (req, res) => {
 
         user.email = email;
         user.name = name;
-
+        
         await user.save();
 
         const tokenUser = createTokenUser(user);
@@ -58,12 +57,12 @@ const updateUser = async (req, res) => {
 const updatePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     try {
-        if(!oldPassword || !newPassword) {
+        if(!oldPassword || !newPassword || !userId) {
             throw new CustomError.UnauthenticatedError('Please provide all values');
         }
         const user = await User.findOne({_id: req.user.userId});
 
-        const isPasswordCorrect = await User.comparePassowrd(oldPassword);
+        const isPasswordCorrect = await user.comparePassowrd(oldPassword);
         if(!isPasswordCorrect) {
             throw new CustomError.UnauthenticatedError('Invalid credentials');
         }
