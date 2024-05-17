@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authenticateUser  = require('../middleware/authentication');
 
 const {
     getAllUsers,
@@ -10,7 +11,7 @@ const {
 
 
 router.route('/').get(getAllUsers);
-router.route('/:id').get(getSingleUser);
+router.route('/profile').get(authenticateUser, getSingleUser);
 router.route('/update-user').patch(updateUser);
 router.route('/update-password').patch(updatePassword);
 
