@@ -21,10 +21,11 @@ const getAllUsers = async (req, res) => {
 //get user by id
 const getSingleUser = async (req, res) => {
     try {
-        const user = await User.findOne({ _id: req.params.id });
+        const user = await User.findById(req.user.userId).select('-password');
         if(!user) {
-            throw new CustomError.NotFoundError('User not found');
+            throw new CustomError.NotFoundError(`No user with id: ${req.user.id}`);
         }
+        checkPermissions(req.user, user._id);
         res.status(StatusCodes.OK).json({ user });
     } catch (error) {
         console.error('Error getting user',error)
