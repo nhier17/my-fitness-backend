@@ -23,8 +23,16 @@ const userRouter = require('./routes/UserRoutes');
 const notFoundMiddleware = require('./middleware/not-found');
 const errorHandlerMiddleware = require('./middleware/error-handler');
 
+//cors options
+const corsOptions = {   
+    origin: 'http://localhost:3000',
+    credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
