@@ -32,6 +32,7 @@ const getSingleUser = async (req, res) => {
     res.status(StatusCodes.OK).json({ user: req.user });
   };
 
+ 
 //update user 
 const updateUser = async (req, res) => {
     const { email, name } = req.body;
@@ -80,4 +81,5 @@ module.exports = {
     getSingleUser,
     updateUser,
     updatePassword,
+    showCurrentUser
 }
