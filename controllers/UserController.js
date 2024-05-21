@@ -30,8 +30,19 @@ const getSingleUser = async (req, res) => {
   };
   
   const showCurrentUser = async (req, res) => {
-    console.log('Current user: ' , req.user);
-    res.status(StatusCodes.OK).json({ user: req.user });
+    try {
+        const userId = req.user.userId;
+        const user = await User.findById(userId).select('-password');
+        if (!user) {
+            throw new CustomError.NotFoundError(`No user with id : ${req.params.id}`);
+        }
+
+        console.log('Current user: ' , req.user);
+        res.status(StatusCodes.OK).json({ user: req.user });
+    } catch (error) {
+        res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+    }
+
   };
 
  

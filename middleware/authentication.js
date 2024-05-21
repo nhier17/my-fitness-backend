@@ -10,9 +10,9 @@ const authenticateUser = async (req, res, next) => {
   }
 
   try {
-    const { name, userId, role, profilePicure } = isTokenValid({ token });
-    console.log('User identified:', name, userId, role, profilePicure)
-    req.user = { name, userId, role, profilePicure }; 
+    const { name, userId, role } = isTokenValid({ token });
+    console.log('User identified:', name, userId, role)
+    req.user = { name, userId, role };
     next();
   } catch (error) {
     console.error('Error validating token',error);
