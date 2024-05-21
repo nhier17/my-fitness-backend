@@ -50,13 +50,14 @@ const login = async (req, res) => {
             }
         } else {
   //check password if 2FA is not enabled
-  const isPasswordCorrect = await user.comparePassowrd(password);
+  const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
       throw new  CustomError.UnauthenticatedError('Invalid credentials');
   }
-        }
+      }
       
         const tokenUser = createTokenUser(user);
+        console.log(tokenUser);
         attachCookiesToResponse({ res, user: tokenUser });
         res.status(StatusCodes.OK).json({
             user: tokenUser
@@ -67,6 +68,7 @@ const login = async (req, res) => {
         });
     }
 };
+
 //logout user
 const logout = async (req, res) => {
     res.cookie('token', 'logout', {
@@ -75,6 +77,7 @@ const logout = async (req, res) => {
     });
     res.status(StatusCodes.OK).json({ msg: 'user logged out!' });
   };
+  
   //enable 2FA
   const enable2FA = async (req, res) => {
     const userdId = req.user._id;

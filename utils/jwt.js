@@ -5,6 +5,7 @@ const createJWT = ({ payload }) => {
 const token = JWT.sign(payload, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_LIFETIME,
 });
+console.log('Token Created',token);
 return token;
 };
 //istoken valid
@@ -23,6 +24,7 @@ const attachCookiesToResponse = ({ res, user }) => {
       secure: process.env.NODE_ENV === 'production' ? true : false,
       signed: true,
     });
+    console.log('Token attached to response:', token);
   };
 
   module.exports = {
