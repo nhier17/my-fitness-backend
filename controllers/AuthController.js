@@ -171,7 +171,7 @@ const logout = async (req, res) => {
     const profilePicture = req.file ? req.file.path : undefined;
 
     try {
-        const user = await User.findById(userId).select('-password');
+        let user = await User.findById(userId).select('-password');
         if (!user) {
             throw new CustomError.NotFoundError('User not found');
         }
