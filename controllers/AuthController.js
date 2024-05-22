@@ -170,6 +170,9 @@ const logout = async (req, res) => {
     const profilePicture = req.file;
 
     try {
+        if(!userId) {
+            throw new CustomError.BadRequestError('Please provide user id');
+        }
         let user = await User.findById(userId);
         if (!user) {
             throw new CustomError.NotFoundError('User not found');
@@ -177,13 +180,10 @@ const logout = async (req, res) => {
 
         if(!profilePicture) {
             throw new CustomError.BadRequestError('Please provide a profile picture');
-        } else {
-            const profilePath = '/uploads/' + profilePicture.filename;
-            user.profilePicture = profilePath;
-        
-            await user.save();  
-    
-        }
+        } 
+        const profilePath = '/uploads/' + profilePicture.filename;
+        user.profilePicture = profilePath;
+         await user.save();         
             
         res.status(StatusCodes.OK).json({ user });
     } catch (error) {
