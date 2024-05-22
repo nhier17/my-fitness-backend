@@ -25,7 +25,7 @@ const errorHandlerMiddleware = require('./middleware/error-handler');
 
 //cors options
 const corsOptions = {   
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: '*',
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowHeaders: ['Content-Type', 'Authorization'],
