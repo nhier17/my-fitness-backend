@@ -167,22 +167,25 @@ const logout = async (req, res) => {
 
   //update user profile pic
   const updateUserProfile = async (req, res) => {
-    const {userId } = req.body;
+    const { userId } = req.body;
     const profilePicture = req.file;
-    const profilePath = '/uploads/' + profilePicture.filename;
-    
-    console.log('User ID:', userId);
-    console.log('Profile Picture:', profilePicture);
+
     try {
-        let user = await User.findById(userId).select('-password');
+        let user = await User.findById(userId);
         if (!user) {
             throw new CustomError.NotFoundError('User not found');
         }
-        console.log('Found User:', user);
-        user.profilePicture = profilePath;
 
-        await user.save();
-        console.log('Updated User:', user);
+        if(!profilePicture) {
+            throw new CustomError.BadRequestError('Please provide a profile picture');
+        } else {
+            const profilePath = '/uploads/' + profilePicture.filename;
+            user.profilePicture = profilePath;
+        
+            await user.save();  
+    
+        }
+            
         res.status(StatusCodes.OK).json({ user });
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json({
