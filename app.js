@@ -25,7 +25,7 @@ const errorHandlerMiddleware = require('./middleware/error-handler');
 
 //cors options
 const corsOptions = {   
-    origin: '*',
+    origin: ['https://my-fitness17.netlify.app', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowHeaders: ['Content-Type', 'Authorization'],
