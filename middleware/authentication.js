@@ -8,8 +8,8 @@ const authenticateUser = async (req, res, next) => {
   }
 
   try {
-    const { name, userId, role, profilePicture } = isTokenValid({ token });
-    req.user = { name, userId, role, profilePicture };
+    const { name, userId, role, profile } = isTokenValid({ token });
+    req.user = { name, userId, role, profile };
     next();
   } catch (error) {
     console.error('Error validating token',error);
