@@ -36,7 +36,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    profilePicture: String
+    profilePicture: {
+        type: String,
+        default: '',
+    },
    
 });
 //harsh the password
