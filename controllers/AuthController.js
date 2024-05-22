@@ -171,14 +171,29 @@ const logout = async (req, res) => {
     const profilePicture = req.file ? req.file.path : undefined;
 
     try {
-        let user = await User.findById(userId);
+        if (!userId) {
+            throw new CustomError.BadRequestError('User not found');
+        }
+
+        const user = await User.findById(userId).select('-password');
         if (!user) {
             throw new CustomError.NotFoundError('User not found');
         }
-        
-        user.profilePicture = profilePicture || user.profilePicture;
+        if (profilePicture) {
+            user.profilePicture = profilePicture;
+        }
+
         await user.save();
-        res.status(StatusCodes.OK).json({ user });
+       
+        res.status(StatusCodes.OK).json({
+             user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                profilePicture: user.profilePicture,
+                },
+         });
     } catch (error) {
         res.status(StatusCodes.BAD_REQUEST).json({
             error: error.message
