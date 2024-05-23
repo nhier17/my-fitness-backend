@@ -1,44 +1,46 @@
-const Workout = require('../models/Workout')
-const { StatusCodes } = require('http-status-codes')
-const{ BadRequestError } = require('../errors')
+const Workout = require('../models/Workout');
+const { StatusCodes } = require('http-status-codes');
+const CustomError = require('../errors');
+const User = require('../models/User');
 
-//create a new Workout
+// Create a new Workout
 const createWorkout = async (req, res) => {
     try {
         const { exercises } = req.body;
         if (!exercises || !Array.isArray(exercises)){
-            throw new BadRequestError('Exercises must be an array');
+            throw new CustomError.BadRequestError('Exercises must be an array');
         }
-        const newWorkout = await Workout({
+        const newWorkout = new Workout({
+            user: req.user.userData,
             exercises,
         });
         
         await newWorkout.save();
         res.status(StatusCodes.CREATED).json(newWorkout);
     } catch (error) {
-        console.error('Error creating workout',error);
+        console.error('Error creating workout', error);
         res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
     }
 };
 
-//get all workouts
+// Get all workouts
 const getAllWorkouts = async (req, res) => {
     try {
-        const workouts = await Workout.find();
+        const workouts = await Workout.find({user: req.user.userId});
         res.status(StatusCodes.OK).json(workouts);
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
     }
 };
 
-//get a workout by id
+// Get a workout by ID
 const getWorkoutById = async (req, res) => {
     const { id } = req.params;
     try {
         const workout = await Workout.findById(id);
         if (!workout) {
-            res.status(StatusCodes.NOT_FOUND).json({ message: 'Workout not found' });
-        };
+            throw new CustomError.NotFoundError('Workout not found');
+        }
 
         res.status(StatusCodes.OK).json(workout);
     } catch (error) {
@@ -46,7 +48,7 @@ const getWorkoutById = async (req, res) => {
     }
 };
 
-//update a workout by id
+// Update a workout by ID
 const updateWorkout = async (req, res) => {
     const { id } = req.params;
     const { user, exercises } = req.body;
@@ -56,8 +58,8 @@ const updateWorkout = async (req, res) => {
             exercises
         }, { new: true });
         if (!workout) {
-            res.status(StatusCodes.NOT_FOUND).json({ message: 'Workout not found' });
-        };
+            throw new CustomError.NotFoundError('Workout not found');
+        }
 
         res.status(StatusCodes.OK).json(workout);
     } catch (error) {
@@ -65,37 +67,140 @@ const updateWorkout = async (req, res) => {
     }
 };
 
-//delete a workout by id
+// Delete a workout by ID
 const deleteWorkout = async (req, res) => {
     const { id } = req.params;
     try {
         const workout = await Workout.findByIdAndDelete(id);
         if (!workout) {
-            res.status(StatusCodes.NOT_FOUND).json({ message: 'Workout not found' });
-        };
-        await workout.remove();
-        res.status(StatusCodes.OK).json({ message: 'Workout deleted successfully'});
+            throw new CustomError.NotFoundError(`Workout ${id} not found`);
+        }
+
+        res.status(StatusCodes.OK).json({ message: 'Workout deleted successfully' });
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
     }
 };
-//start workout
+
+// Start workout
 const startWorkout = async (req, res) => {
-const { id } = req.params;
-try {
-    const workout = await Workout.findById(id);
-    //check if workout exists
-    if(!workout) {
-        res.status(StatusCodes.NOT_FOUND).json({ message: 'Workout not found' });
-        return;
+    const { id } = req.params;
+    try {
+        const workout = await Workout.findById(id);
+        if (!workout) {
+            throw new CustomError.NotFoundError(`Workout ${id} not found`);
+        }
+        workout.startedAt = new Date();
+        await workout.save();
+        res.status(StatusCodes.OK).json(workout);
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
     }
-    //update startedAt field 
-    workout.startedAt = new Date();
-    await workout.save();
-    res.status(StatusCodes.OK).json(workout);
-} catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
-}
+};
+
+// Get workout summary
+const getWorkoutSummary = async (req, res) => {
+    try {
+        const userId = req.user.userId
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new CustomError.BadRequestError('User not found');
+        }
+
+        const currentDateFormatted = new Date();
+        const startToday = new Date(
+            currentDateFormatted.getFullYear(),
+            currentDateFormatted.getMonth(),
+            currentDateFormatted.getDate()
+        );
+        const endToday = new Date(
+            currentDateFormatted.getFullYear(),
+            currentDateFormatted.getMonth(),
+            currentDateFormatted.getDate() + 1
+        );
+
+        const totalCaloriesBurnt = await Workout.aggregate([
+            { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
+            {
+                $group: {
+                    _id: null,
+                    totalCaloriesBurnt: { $sum: '$caloriesBurnt' },
+                },
+            },
+        ]);
+
+        const totalWorkouts = await Workout.countDocuments({
+            user: user.userId,
+            date: { $gte: startToday, $lt: endToday },
+        });
+
+        const averageCalories = totalCaloriesBurnt.length > 0 ? totalCaloriesBurnt[0].totalCaloriesBurnt / totalWorkouts : 0;
+
+        const categoryCalories = await Workout.aggregate([
+            { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
+            {
+                $group: {
+                    _id: '$exercises.exercise', // Assuming category is in exercises.exercise
+                    totalCaloriesBurnt: { $sum: '$caloriesBurnt' },
+                },
+            },
+        ]);
+
+        const pieChartData = categoryCalories.map((category, i) => ({
+            id: i,
+            value: category.totalCaloriesBurnt,
+            label: category._id,
+        }));
+
+        const weeks = [];
+        const caloriesBurnt = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(
+                currentDateFormatted.getTime() - i * 24 * 60 * 60 * 1000
+            );
+            weeks.push(`${date.getDate()}th`);
+
+            const startOfDay = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate()
+            );
+            const endOfDay = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate() + 1
+            );
+
+            const weekData = await Workout.aggregate([
+                { $match: { user: user._id, date: { $gte: startOfDay, $lt: endOfDay } } },
+                {
+                    $group: {
+                        _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+                        totalCaloriesBurnt: { $sum: '$caloriesBurnt' },
+                    },
+                },
+                {
+                    $sort: { _id: 1 },
+                },
+            ]);
+
+            caloriesBurnt.push(weekData[0]?.totalCaloriesBurnt ? weekData[0]?.totalCaloriesBurnt : 0);
+        }
+
+        res.status(StatusCodes.OK).json({
+            totalCaloriesBurnt: totalCaloriesBurnt.length > 0 ? totalCaloriesBurnt[0].totalCaloriesBurnt : 0,
+            totalWorkouts,
+            averageCalories,
+            totalWeeksCaloriesBurnt: {
+                weeks,
+                caloriesBurnt,
+            },
+            pieChartData,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
+    }
 };
 
 module.exports = {
@@ -105,4 +210,5 @@ module.exports = {
     updateWorkout,
     deleteWorkout,
     startWorkout,
+    getWorkoutSummary,
 };

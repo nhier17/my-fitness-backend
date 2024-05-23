@@ -23,7 +23,7 @@ const {
 
 router.route('/').post(upload.single('image'),createExercise)
 .get(getAllExercises);
-router.route('/exercise/:id')
+router.route('/:id')
 .get(getExerciseById)
 .patch(updateExercise)
 .delete(deleteExercise);
