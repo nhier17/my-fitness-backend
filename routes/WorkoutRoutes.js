@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authenticateUser  = require('../middleware/authentication');
 
 const {
     createWorkout,
@@ -10,8 +11,8 @@ const {
     startWorkout
 } = require('../controllers/WorkoutController');
 
-router.route('/').post(createWorkout).get(getAllWorkouts);
-router.post('/:id/start-workout', startWorkout)
+router.route('/').post(authenticateUser,createWorkout).get(authenticateUser, getAllWorkouts);
+router.route('/:id/start-workout').post(authenticateUser, startWorkout)
 router.route('/workouts/:id')
 .get(getWorkoutById)
 .patch(updateWorkout)
