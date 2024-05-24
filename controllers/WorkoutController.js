@@ -101,7 +101,7 @@ const startWorkout = async (req, res) => {
 // Get workout summary
 const getWorkoutSummary = async (req, res) => {
     try {
-        const userId = req.user.userId
+        const userId = req.user.userId;
         const user = await User.findById(userId);
         if (!user) {
             throw new CustomError.BadRequestError('User not found');
@@ -130,7 +130,7 @@ const getWorkoutSummary = async (req, res) => {
         ]);
 
         const totalWorkouts = await Workout.countDocuments({
-            user: user.userId,
+            user: userId,
             date: { $gte: startToday, $lt: endToday },
         });
 
@@ -139,8 +139,17 @@ const getWorkoutSummary = async (req, res) => {
         const categoryCalories = await Workout.aggregate([
             { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
             {
+                $lookup: {
+                    from: 'exercises',
+                    localField: 'exercise',
+                    foreignField: '_id',
+                    as: 'exerciseDetails',
+                },
+            },
+            { $unwind: '$exerciseDetails' },
+            {
                 $group: {
-                    _id: '$exercises.exercise', // Assuming category is in exercises.exercise
+                    _id: '$exerciseDetails.category',
                     totalCaloriesBurnt: { $sum: '$caloriesBurnt' },
                 },
             },
@@ -202,6 +211,7 @@ const getWorkoutSummary = async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
     }
 };
+
 
 module.exports = {
     createWorkout,
