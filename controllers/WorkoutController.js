@@ -11,7 +11,7 @@ const createWorkout = async (req, res) => {
             throw new CustomError.BadRequestError('Exercises must be an array');
         }
         const newWorkout = new Workout({
-            user: req.user.userData,
+            user: req.user.userId,
             exercises,
         });
         
