@@ -214,11 +214,20 @@ const getWorkoutSummary = async (req, res) => {
 //complete workout
 const completeWorkout = async (req, res) => {
     const { id } = req.params;
+    const { exerciseDetails } = req.body;
     try {
         const workout = await Workout.findById(id);
         if (!workout) {
             throw new CustomError.NotFoundError(`Workout ${id} not found`);
         }
+        //update the workout with exercise details
+        workout.exercises.forEach(exercise => {
+            if(exerciseDetails[exercise._id]) {
+                exercise.weight = exerciseDetails[exercise._id].weight;
+                exercise.sets = exerciseDetails[exercise._id].sets;
+                exercise.reps = exerciseDetails[exercise._id].reps;  
+            }
+        });
         workout.completedAt = new Date();
         await workout.save();
         res.status(StatusCodes.OK).json(workout);
