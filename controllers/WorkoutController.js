@@ -211,6 +211,21 @@ const getWorkoutSummary = async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
     }
 };
+//complete workout
+const completeWorkout = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const workout = await Workout.findById(id);
+        if (!workout) {
+            throw new CustomError.NotFoundError(`Workout ${id} not found`);
+        }
+        workout.completedAt = new Date();
+        await workout.save();
+        res.status(StatusCodes.OK).json(workout);
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
+    }
+};
 
 
 module.exports = {
@@ -221,4 +236,5 @@ module.exports = {
     deleteWorkout,
     startWorkout,
     getWorkoutSummary,
+    completeWorkout
 };

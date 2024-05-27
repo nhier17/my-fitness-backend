@@ -9,11 +9,13 @@ const {
     updateWorkout,
     deleteWorkout,
     startWorkout,
-    getWorkoutSummary
+    getWorkoutSummary,
+    completeWorkout
 } = require('../controllers/WorkoutController');
 
 router.route('/').post(authenticateUser,createWorkout).get(authenticateUser, getAllWorkouts);
 router.route('/:id/start-workout').post(authenticateUser, startWorkout)
+router.route('/:id/complete-workout').post(authenticateUser, completeWorkout)
 router.route('/dashboard').get(authenticateUser, getWorkoutSummary)
 router.route('/workouts/:id')
 .get(getWorkoutById)
