@@ -14,7 +14,7 @@ const {
 } = require('../controllers/WorkoutController');
 
 router.route('/').post(authenticateUser,createWorkout).get(authenticateUser, getAllWorkouts);
-router.route('/:id/start-workout').post(authenticateUser, startWorkout)
+router.route('/start-workout').post(authenticateUser, startWorkout)
 router.route('/:id/complete-workout').post(authenticateUser, completeWorkout)
 router.route('/dashboard').get(authenticateUser, getWorkoutSummary)
 router.route('/workouts/:id')
