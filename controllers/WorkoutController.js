@@ -98,9 +98,7 @@ try {
             weight: ex.weight,
             sets: ex.sets,
             reps: ex.reps,
-            duration: ex.duration,
             date: Date.now(),
-            caloriesBurnt: (ex.weight * ex.reps * ex.duration) / 60000,
         })),
         startedAt: new Date(),
     });
