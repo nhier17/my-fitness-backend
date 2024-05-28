@@ -93,7 +93,15 @@ try {
 
     const newWorkout = new Workout({
         user: req.user.userId,
-        exercises,
+        exercises: exercises.map(ex => ({
+            exercise: ex.exercise,
+            weight: ex.weight,
+            sets: ex.sets,
+            reps: ex.reps,
+            duration: ex.duration,
+            date: Date.now(),
+            caloriesBurnt: (ex.weight * ex.reps * ex.duration) / 60000,
+        })),
         startedAt: new Date(),
     });
 
