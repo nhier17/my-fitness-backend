@@ -84,18 +84,24 @@ const deleteWorkout = async (req, res) => {
 
 // Start workout
 const startWorkout = async (req, res) => {
-    const { id } = req.params;
-    try {
-        const workout = await Workout.findById(id);
-        if (!workout) {
-            throw new CustomError.NotFoundError(`Workout ${id} not found`);
-        }
-        workout.startedAt = new Date();
-        await workout.save();
-        res.status(StatusCodes.OK).json(workout);
-    } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
+try {
+    const { exercises } = req.body;
+    console.log('Received workout', exercises)
+    if (!exercises ||!Array.isArray(exercises)){
+        throw new CustomError.BadRequestError('Exercises must be an array');
     }
+
+    const newWorkout = new Workout({
+        user: req.user.userId,
+        exercises,
+        startedAt: new Date(),
+    });
+
+    await newWorkout.save();
+    res.status(StatusCodes.CREATED).json(newWorkout);
+} catch (error) {
+    console.error('Error starting workout',error);
+}
 };
 
 // Get workout summary
@@ -215,6 +221,7 @@ const getWorkoutSummary = async (req, res) => {
 const completeWorkout = async (req, res) => {
     const { id } = req.params;
     const { exerciseDetails } = req.body;
+    console.log('workout complete', exerciseDetails)
     try {
         const workout = await Workout.findById(id);
         if (!workout) {
