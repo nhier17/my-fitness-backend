@@ -104,7 +104,7 @@ try {
     });
 
     await newWorkout.save();
-    res.status(StatusCodes.CREATED).json(newWorkout);
+    res.status(StatusCodes.CREATED).json({ workoutId: newWorkout._id});
 } catch (error) {
     console.error('Error starting workout',error);
 }
