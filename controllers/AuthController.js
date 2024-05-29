@@ -1,8 +1,11 @@
 const User = require('../models/User');
-const { StatusCodes } = require('http-status-codes')
-const CustomError = require('../errors')
-const { attachCookiesToResponse,createTokenUser } = require('../utils')
+const { StatusCodes } = require('http-status-codes');
+const CustomError = require('../errors');
+const { attachCookiesToResponse,createTokenUser } = require('../utils');
+const {OAuth2Client} = require('google-auth-library');
 
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 //register new user 
 const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
