@@ -226,7 +226,6 @@ const getWorkoutSummary = async (req, res) => {
 //complete workout
 const completeWorkout = async (req, res) => {
     const {workoutId, exerciseDetails } = req.body;
-    console.log('workout complete', exerciseDetails)
     try {
         const workout = await Workout.findById(workoutId);
         if (!workout) {

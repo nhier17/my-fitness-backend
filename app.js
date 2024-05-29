@@ -49,7 +49,6 @@ app.use(errorHandlerMiddleware);
 app.get('/', (req, res) => {
     res.send('Eat, Train, Sleep!');
 });
-//create user schema and controllers
 
 
 
