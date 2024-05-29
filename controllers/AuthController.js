@@ -68,6 +68,43 @@ const login = async (req, res) => {
     }
 };
 
+//google login
+  const googleLogin = async (req, res) => {
+    const { idToken } = req.body;
+    try {
+        //verify google id token
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const { email, name, picture, sub } = payload;
+        //create google user
+        let user = await User.findOne({ googleId: sub });
+        if (!user) {
+            user = new User ({
+                googleId: sub,
+                name,
+                email,
+                profilePicture: picture,
+            });
+            await user.save();
+        }
+
+        //create token
+        const tokenUser = createTokenUser(user);
+        attachCookiesToResponse({ res, user: tokenUser });
+        res.status(StatusCodes.OK).json({
+            user: tokenUser
+        });
+    } catch (error) {
+        console.error('Error verifying Google ID token',error);
+        res.status(StatusCodes.BAD_REQUEST).json({
+            error: 'Google login failed',
+        });
+    }
+  };
+
 //logout user
 const logout = async (req, res) => {
     res.cookie('token', 'logout', {
@@ -203,4 +240,5 @@ module.exports = {
     forgotPassword,
     resetPassword,
     updateUserProfile,
+    googleLogin,
 };

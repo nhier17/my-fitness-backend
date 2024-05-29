@@ -21,11 +21,13 @@ const {
       disable2FA,
       resetPassword,
       forgotPassword,
-      updateUserProfile
+      updateUserProfile,
+      googleLogin
      } = require('../controllers/AuthController')
 
 router.post('/register', registerUser);
 router.post('/login', login);
+router.post('/google-login', googleLogin);
 router.get('/logout', logout);
 router.post('/reset-password', resetPassword);
 router.post('/forgot-password', forgotPassword);
