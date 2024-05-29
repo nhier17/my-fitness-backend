@@ -22,9 +22,19 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: [true, 'Please provide password'],
         minlength: 6,
+        validate: function(value) {
+            if(this.isGoogleUser && !value) {
+                return true;
+            }
+            return value ? value.length >= 6 : false;
+        },
+        message: 'Please provide a passsword with at least 6 characters'
     }, 
+    isGoogleUser: {
+        type: Boolean,
+        default: false,
+    },
     role: {
         type: String,
         required: [true, 'Please provide role'],

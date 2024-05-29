@@ -83,15 +83,18 @@ const login = async (req, res) => {
         const payload = ticket.getPayload();
         const { email, name, picture, sub } = payload;
         //create google user
-        let user = await User.findOne({ googleId: sub });
+        let user = await User.findOne({ email });
         if (!user) {
             user = new User ({
                 googleId: sub,
                 name,
                 email,
                 profilePicture: picture,
+                isGoogleUser: true
             });
             await user.save();
+        } else if(!user.isGoogleUser) {
+            throw new CustomError.BadRequestError('User already exists');
         }
 
         //create token
