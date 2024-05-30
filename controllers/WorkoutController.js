@@ -99,6 +99,7 @@ try {
             sets: ex.sets,
             reps: ex.reps,
             date: Date.now(),
+            caloriesBurnt: ex.caloriesBurnt
         })),
         startedAt: new Date(),
     });
@@ -236,7 +237,8 @@ const completeWorkout = async (req, res) => {
             if(exerciseDetails[exercise._id]) {
                 exercise.weight = exerciseDetails[exercise._id].weight;
                 exercise.sets = exerciseDetails[exercise._id].sets;
-                exercise.reps = exerciseDetails[exercise._id].reps;  
+                exercise.reps = exerciseDetails[exercise._id].reps; 
+                exercise.caloriesBurnt = exerciseDetails[exercise._id].caloriesBurnt; 
             }
         });
         workout.completedAt = new Date();
