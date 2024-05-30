@@ -121,40 +121,34 @@ const getWorkoutSummary = async (req, res) => {
         }
 
         const currentDateFormatted = new Date();
-        const startToday = new Date(
-            currentDateFormatted.getFullYear(),
-            currentDateFormatted.getMonth(),
-            currentDateFormatted.getDate()
-        );
-        const endToday = new Date(
-            currentDateFormatted.getFullYear(),
-            currentDateFormatted.getMonth(),
-            currentDateFormatted.getDate() + 1
-        );
+        const startToday = new Date(currentDateFormatted.getFullYear(), currentDateFormatted.getMonth(), currentDateFormatted.getDate());
+        const endToday = new Date(currentDateFormatted.getFullYear(), currentDateFormatted.getMonth(), currentDateFormatted.getDate() + 1);
 
         const totalCaloriesBurnt = await Workout.aggregate([
-            { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
+            { $match: { user: user._id, "exercises.date": { $gte: startToday, $lt: endToday } } },
+            { $unwind: "$exercises" }, // Unwind exercises array
             {
                 $group: {
                     _id: null,
-                    totalCaloriesBurnt: { $sum: '$caloriesBurnt' },
+                    totalCaloriesBurnt: { $sum: '$exercises.caloriesBurnt' },
                 },
             },
         ]);
 
         const totalWorkouts = await Workout.countDocuments({
             user: userId,
-            date: { $gte: startToday, $lt: endToday },
+            "exercises.date": { $gte: startToday, $lt: endToday },
         });
 
-        const averageCalories = totalCaloriesBurnt.length > 0 ? totalCaloriesBurnt[0].totalCaloriesBurnt / totalWorkouts : 0;
+        const averageCalories = totalWorkouts > 0 ? (totalCaloriesBurnt.length > 0 ? totalCaloriesBurnt[0].totalCaloriesBurnt / totalWorkouts : 0) : 0;
 
         const categoryCalories = await Workout.aggregate([
-            { $match: { user: user._id, date: { $gte: startToday, $lt: endToday } } },
+            { $match: { user: user._id, "exercises.date": { $gte: startToday, $lt: endToday } } },
+            { $unwind: "$exercises" },
             {
                 $lookup: {
                     from: 'exercises',
-                    localField: 'exercise',
+                    localField: 'exercises.exercise',
                     foreignField: '_id',
                     as: 'exerciseDetails',
                 },
@@ -163,7 +157,7 @@ const getWorkoutSummary = async (req, res) => {
             {
                 $group: {
                     _id: '$exerciseDetails.category',
-                    totalCaloriesBurnt: { $sum: '$caloriesBurnt' },
+                    totalCaloriesBurnt: { $sum: '$exercises.caloriesBurnt' },
                 },
             },
         ]);
@@ -177,33 +171,22 @@ const getWorkoutSummary = async (req, res) => {
         const weeks = [];
         const caloriesBurnt = [];
         for (let i = 6; i >= 0; i--) {
-            const date = new Date(
-                currentDateFormatted.getTime() - i * 24 * 60 * 60 * 1000
-            );
+            const date = new Date(currentDateFormatted.getTime() - i * 24 * 60 * 60 * 1000);
             weeks.push(`${date.getDate()}th`);
 
-            const startOfDay = new Date(
-                date.getFullYear(),
-                date.getMonth(),
-                date.getDate()
-            );
-            const endOfDay = new Date(
-                date.getFullYear(),
-                date.getMonth(),
-                date.getDate() + 1
-            );
+            const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
 
             const weekData = await Workout.aggregate([
-                { $match: { user: user._id, date: { $gte: startOfDay, $lt: endOfDay } } },
+                { $match: { user: user._id, "exercises.date": { $gte: startOfDay, $lt: endOfDay } } },
+                { $unwind: "$exercises" },
                 {
                     $group: {
-                        _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
-                        totalCaloriesBurnt: { $sum: '$caloriesBurnt' },
+                        _id: { $dateToString: { format: "%Y-%m-%d", date: "$exercises.date" } },
+                        totalCaloriesBurnt: { $sum: '$exercises.caloriesBurnt' },
                     },
                 },
-                {
-                    $sort: { _id: 1 },
-                },
+                { $sort: { _id: 1 } },
             ]);
 
             caloriesBurnt.push(weekData[0]?.totalCaloriesBurnt ? weekData[0]?.totalCaloriesBurnt : 0);
@@ -224,6 +207,7 @@ const getWorkoutSummary = async (req, res) => {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
     }
 };
+
 //complete workout
 const completeWorkout = async (req, res) => {
     const {workoutId, exerciseDetails } = req.body;
@@ -232,6 +216,7 @@ const completeWorkout = async (req, res) => {
         if (!workout) {
             throw new CustomError.NotFoundError(`Workout ${id} not found`);
         }
+        console.log('Received exercise details for completing workout:', exerciseDetails);
         //update the workout with exercise details
         workout.exercises.forEach(exercise => {
             if(exerciseDetails[exercise._id]) {
