@@ -12,15 +12,7 @@ const createWorkout = async (req, res) => {
         }
         const newWorkout = new Workout({
             user: req.user.userId,
-            exercises: exercises.map(ex => ({
-            exercise: ex.exercise,
-            weight: ex.weight,
-            sets: ex.sets,
-            reps: ex.reps,
-            date: Date.now(),
-            caloriesBurnt: ex.caloriesBurnt
-          })),
-        startedAt: new Date(),
+            exercises
         });
         
         await newWorkout.save();
