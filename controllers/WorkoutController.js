@@ -86,7 +86,6 @@ const deleteWorkout = async (req, res) => {
 const startWorkout = async (req, res) => {
 try {
     const { exercises } = req.body;
-    console.log('Received workout', exercises)
     if (!exercises ||!Array.isArray(exercises)){
         throw new CustomError.BadRequestError('Exercises must be an array');
     }
@@ -105,7 +104,6 @@ try {
     });
 
     await newWorkout.save();
-    console.log('New Workout:', newWorkout);
     res.status(StatusCodes.CREATED).json({ workoutId: newWorkout._id});
 } catch (error) {
     console.error('Error starting workout',error);
@@ -120,7 +118,6 @@ const completeWorkout = async (req, res) => {
         if (!workout) {
             throw new CustomError.NotFoundError(`Workout ${id} not found`);
         }
-        console.log('Received exercise details for completing workout:', exerciseDetails);
         //update the workout with exercise details
         workout.exercises.forEach(exercise => {
             if(exerciseDetails[exercise._id]) {
@@ -142,33 +139,52 @@ const completeWorkout = async (req, res) => {
 const getWorkoutSummary = async (req, res) => {
     try {
         const userId = req.user.userId;
-        const workouts = await Workout.find({user: userId});
-        if(!userId) {
+        const workouts = await Workout.find({ user: userId });
+
+        if (!userId) {
             throw new CustomError.NotFoundError(`User ${userId} not found`);
         }
-        //calculate summary data
+
         const totalWorkouts = workouts.length;
-        const totalCaloriesBurnt = workouts.reduce((total, workout) => total + workout.caloriesBurnt, 0);
-        const avgDuration = (workouts.reduce((total, workout) => total + workout.duration, 0) / totalWorkouts).fixed(2);
-    
+
+        const totalCaloriesBurnt = workouts.reduce((total, workout) => {
+            return total + workout.exercises.reduce((calories, exercise) => {
+                return calories + (exercise.caloriesBurnt || 0);
+            }, 0);
+        }, 0);
+
+        const totalDuration = workouts.reduce((total, workout) => {
+            const startTime = new Date(workout.startedAt).getTime();
+            const endTime = workout.completedAt ? new Date(workout.completedAt).getTime() : startTime;
+            const duration = (endTime - startTime) / 1000 / 60; 
+            return total + duration;
+        }, 0);
+
+        const avgDuration = totalWorkouts > 0 ? (totalDuration / totalWorkouts).toFixed(2) : 0;
+
+        const recentWorkouts = workouts.slice(-5).reverse();
+
         const responseData = {
             summary: {
                 totalWorkouts,
                 totalCaloriesBurnt,
                 avgDuration,
             },
-            recentWorkouts: workouts.slice(-5).reverse(),
+            recentWorkouts,
             progress: {
-                dates: workouts.map(workout => workout.date),
-                weights: workouts.map(workout => workout.exercises.reduce((total, ex) => total + ex.weight, 0) ),
-                reps: workouts.map(workout => workouts.exercises.reduce((total, ex) => total + ex.reps, 0)),
-               },
+                dates: workouts.map(workout => workout.startedAt),
+                weights: workouts.map(workout => workout.exercises.reduce((total, ex) => total + ex.weight, 0)),
+                reps: workouts.map(workout => workout.exercises.reduce((total, ex) => total + ex.reps, 0)),
+            },
         };
+
         res.status(StatusCodes.OK).json(responseData);
     } catch (error) {
-        console.error('Error fetching user workout data',error);
+        console.error('Error fetching user workout data', error);
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Error fetching user workout data' });
     }
-    };
+};
+
     
 
 
