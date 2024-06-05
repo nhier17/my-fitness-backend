@@ -94,6 +94,7 @@ try {
         user: req.user.userId,
         exercises: exercises.map(ex => ({
             exercise: ex.exercise,
+            name: ex.name,
             weight: ex.weight,
             sets: ex.sets,
             reps: ex.reps,
@@ -121,6 +122,7 @@ const completeWorkout = async (req, res) => {
         //update the workout with exercise details
         workout.exercises.forEach(exercise => {
             if(exerciseDetails[exercise._id]) {
+                exercise.name = exerciseDetails[exercise._id].name;
                 exercise.weight = exerciseDetails[exercise._id].weight;
                 exercise.sets = exerciseDetails[exercise._id].sets;
                 exercise.reps = exerciseDetails[exercise._id].reps; 
