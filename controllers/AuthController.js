@@ -122,7 +122,7 @@ const logout = async (req, res) => {
   
   //enable 2FA
   const enable2FA = async (req, res) => {
-    const userdId = req.user.userId;
+    const userdId = req.user._id;
     const { verificationCode } = req.body;
     try {
         const user = await User.findById(userdId);
@@ -140,7 +140,7 @@ const logout = async (req, res) => {
   };
   //disable 2FA
   const disable2FA = async (req, res) => {
-    const userdId = req.user.userId;
+    const userdId = req.user._id;
     try {
         const user = await User.findById(userdId);
         if (!user) {
