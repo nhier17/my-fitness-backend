@@ -143,7 +143,7 @@ const getWorkoutSummary = async (req, res) => {
     try {
         const userId = req.user.userId;
         const workouts = await Workout.find({user: userId});
-        if(!user) {
+        if(!userId) {
             throw new CustomError.NotFoundError(`User ${userId} not found`);
         }
         //calculate summary data
