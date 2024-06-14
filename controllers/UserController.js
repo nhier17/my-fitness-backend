@@ -63,20 +63,21 @@ const updateUser = async (req, res) => {
 
 //update user password
 const updatePassword = async (req, res) => {
-    const { oldPassword, newPassword } = req.body;
     try {
-        if(!oldPassword || !newPassword || !userId) {
-            throw new CustomError.UnauthenticatedError('Please provide all values');
+        const { oldPassword, newPassword } = req.body;
+        if (!oldPassword || !newPassword) {
+          throw new CustomError.BadRequestError('Please provide both values');
         }
-        const user = await User.findOne({_id: req.user.userId});
-
-        const isPasswordCorrect = await user.comparePassowrd(oldPassword);
-        if(!isPasswordCorrect) {
-            throw new CustomError.UnauthenticatedError('Invalid credentials');
+        const user = await User.findOne({ _id: req.user.userId });
+      
+        const isPasswordCorrect = await user.comparePassword(oldPassword);
+        if (!isPasswordCorrect) {
+          throw new CustomError.UnauthenticatedError('Invalid Credentials');
         }
         user.password = newPassword;
+      
         await user.save();
-        res.status(StatusCodes.OK).json({ msg: 'Success! Password updated'});
+        res.status(StatusCodes.OK).json({ msg: 'Success! Password Updated.' });
     } catch (error) {
         console.error('Error updating password',error)
     }
