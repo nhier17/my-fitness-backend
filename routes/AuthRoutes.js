@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const authenticateUser  = require('../middleware/authentication');
 
 const storage = multer.diskStorage({
      destination: function(req, file, cb)  {
@@ -33,7 +34,7 @@ router.post('/reset-password', resetPassword);
 router.post('/forgot-password', forgotPassword);
 router.post('/profile', upload.single('profilePicture'),updateUserProfile)
 //2fa
-router.post('/2fa/enable', enable2FA);
-router.post('/2fa/disable', disable2FA);
+router.post('/2fa/enable',authenticateUser, enable2FA);
+router.post('/2fa/disable',authenticateUser, disable2FA);
 
 module.exports = router;
