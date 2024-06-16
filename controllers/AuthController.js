@@ -156,57 +156,6 @@ const logout = async (req, res) => {
     }
   };
 
-  //forgot password
-  const forgotPassword = async (req, res) => {
-    const { email } = req.body;
-    try {
-        if(!email) {
-            throw new CustomError.BadRequestError('Please provide email');
-        }
-
-        const user = await User.findOne({ email });
-        if(user) {
-            const verificationCode = await user.generateVerificationCode();
-            await user.save();
-            res.status(StatusCodes.OK).json({ msg: 'Verification code sent to your email!' });
-        }
-    } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            error: error.message
-        });
-    }
-  };
-
-  //reset password 
-  const resetPassword = async (req, res) => {
-    const { token, email, password } = req.body;
-    try {
-        if(!token || !email || !password) {
-            throw new CustomError.BadRequestError('Please provide all values');
-        }
-
-        const user = await User.findOne({ email });
-        if(!user) {
-            throw new CustomError.NotFoundError('User not found');
-        }
-        //verify token and expiration
-        if (user.resetPasswordToken !== token || user.resetPasswordExpires < Date.now()) {
-            throw new CustomError.BadRequestError('Invalid or expired token');
-        }
-        //reset password
-        user.password = password;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        await user.save();
-
-        res.status(StatusCodes.OK).json({ msg: 'Password reset successfuly!' });
-    } catch (error) {
-        res.status(StatusCodes.BAD_REQUEST).json({
-            error: error.message
-        });
-    }
-  };
-
   //update user profile pic
   const updateUserProfile = async (req, res) => {
     const { userId } = req.body;
@@ -243,8 +192,6 @@ module.exports = {
     logout,
     enable2FA,
     disable2FA,
-    forgotPassword,
-    resetPassword,
     updateUserProfile,
     googleLogin,
 };
